@@ -18,7 +18,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\..\..\..\Program Files %28loose%29\GameLaunchProxy\</OutputPath>
+    <OutputPath>..\bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -27,7 +27,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\..\..\..\Program Files %28loose%29\GameLaunchProxy\</OutputPath>
+    <OutputPath>..\bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -158,10 +158,6 @@
     <None Include="Resources\GameLaunchProxy.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\CustomForks\open-steamworks\Steam4NET2\Steam4NET2\Steam4NET.csproj">
-      <Project>{1a204257-fe82-4bbe-9ed4-40694821c31f}</Project>
-      <Name>Steam4NET</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Keyboard\Keyboard.csproj">
       <Project>{fe61ad51-a5bc-4133-8657-ae21d1b98afe}</Project>
       <Name>Keyboard</Name>
@@ -169,6 +165,10 @@
     <ProjectReference Include="..\Liron.Windows.Forms\Liron.Windows.Forms.csproj">
       <Project>{1eb31359-e7f5-42ed-8794-49f53e1a9cf1}</Project>
       <Name>Liron.Windows.Forms</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Steam4NET\Steam4NET\Steam4NET.csproj">
+      <Project>{092ead98-f052-4f72-8c29-8ed93a5936af}</Project>
+      <Name>Steam4NET</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

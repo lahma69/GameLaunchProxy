@@ -366,17 +366,17 @@ namespace GameLaunchProxy
                             {
                                 shortcutid = ClientShortcuts.AddOpenVRShortcut(
                                     shortcut.appname,
-                                    shortcut.exe.Trim('"'), // system adds quotes automaticly
-                                    shortcut.icon.Trim('"'), // system adds quotes automaticly
-                                    shortcut.ShortcutPath.Trim('"'));
+                                    shortcut.exe, 
+                                    shortcut.StartDir);
                             }
                             else
                             {
                                 shortcutid = ClientShortcuts.AddShortcut(
                                     shortcut.appname,
-                                    shortcut.exe.Trim('"'), // system adds quotes automaticly
-                                    shortcut.icon.Trim('"'), // system adds quotes automaticly
-                                    shortcut.ShortcutPath.Trim('"'));
+                                    shortcut.exe,
+                                    shortcut.StartDir,
+                                    null,
+                                    shortcut.ShortcutPath);
                             }
                             ClientShortcuts.SetShortcutHidden(shortcutid, shortcut.hidden);
                             ClientShortcuts.SetShortcutIcon(shortcutid, shortcut.icon);
@@ -461,33 +461,32 @@ namespace GameLaunchProxy
 
         public UInt64 GetShortcutID(string appname, string exe, string shortcutFilePath)
         {
-            if (SteamPID > 0)
+            if (SteamPID > 0 && IsSteam4NETLoaded && HasClientShortcutsInterface)
             {
-                if (IsSteam4NETLoaded && HasClientShortcutsInterface)
+                try
                 {
-                    try
+                    uint CountShortcuts = ClientShortcuts.GetShortcutCount();
+                    for (uint x = 0; x < CountShortcuts; x++)
                     {
-                        uint CountShortcuts = ClientShortcuts.GetShortcutCount();
-                        for (uint x = 0; x < CountShortcuts; x++)
+                        string steamexe = ClientShortcuts.GetShortcutExeByIndex(x).Trim('"');
+                        string steamappname = ClientShortcuts.GetShortcutAppNameByIndex(x);
+                        if (exe == steamexe
+                          && appname == steamappname)
                         {
-                            string steamexe = ClientShortcuts.GetShortcutExeByIndex(x).Trim('"');
-                            string steamappname = ClientShortcuts.GetShortcutAppNameByIndex(x);
-                            if (exe == steamexe
-                              && appname == steamappname)
+                            UInt64 shortcutID = SteamShortcut.GetShortcutID(ClientShortcuts.GetShortcutExeByIndex(x), appname);
+                            UInt32 appID = ClientShortcuts.GetAppIDForGameID(new CGameID(shortcutID));
+                            if (appID > 0)
                             {
-                                UInt64 shortcutID = SteamShortcut.GetShortcutID(ClientShortcuts.GetShortcutExeByIndex(x), appname);
-                                UInt32 appID = ClientShortcuts.GetAppIDForGameID(new CGameID(shortcutID));
-                                if (appID > 0)
-                                {
-                                    return shortcutID;
-                                }
+                                return shortcutID;
                             }
                         }
-                        //return 0;
                     }
-                    catch { }
                 }
+                catch { }
+
+                return 0;
             }
+            else
             {
                 if (shortcutFilePath == null)
                     return 0;
@@ -674,20 +673,6 @@ namespace GameLaunchProxy
             }
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         public void SetShortcutName(UInt64 shortcutID, string steamShortcutID, string newName)
         {
             if (!IsSteam4NETLoaded)
@@ -776,9 +761,9 @@ namespace GameLaunchProxy
         private string _icon;
 
         public string appname { get; set; }
-        public string exe { get { return "\"" + _exe.Trim('"') + "\""; } set { _exe = value; } }
-        public string StartDir { get { return "\"" + _StartDir.Trim('"') + "\""; } set { _StartDir = value; } }
-        public string icon { get { return string.IsNullOrEmpty(_icon) ? null : "\"" + _icon.Trim('"') + "\""; } set { _icon = value; } }
+        public string exe { get { return _exe.Trim('"'); } set { _exe = value; } }
+        public string StartDir { get { return _StartDir.Trim('"'); } set { _StartDir = value; } }
+        public string icon { get { return string.IsNullOrEmpty(_icon) ? null : _icon.Trim('"'); } set { _icon = value; } }
         public string ShortcutPath { get; set; }
         public bool hidden { get; set; }
         public bool AllowDesktopConfig { get; set; }
@@ -799,8 +784,10 @@ namespace GameLaunchProxy
             this.OpenVR = OpenVR;
             this.tags = tags ?? new List<string>();
         }
-
-        public static UInt64 GetShortcutID(string exe, string appname)
+        // ShortcutID is the number in a steam shortcut -> steam://rungameid/XXXXXXXXXXXXXXXXXXX 
+        // This is NOT used to modify shortcuts with IClientShortcuts - instead the AppID is used
+        // To convert ShortcutID to AppID, call: ClientShortcuts.GetAppIDForGameID(new CGameID(ShortcutID))
+        public static UInt64 GetShortcutID(string exe, string appname) 
         {
             CRC algorithm = new CRC(crcSetting);
             string crc_input = exe + appname;
