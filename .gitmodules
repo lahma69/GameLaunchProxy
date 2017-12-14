@@ -1,0 +1,4 @@
+[submodule "Steam4NET"]
+	path = Steam4NET
+	url = git@github.com:lahma69/Steam4NET.git
+	branch = master
